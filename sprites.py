@@ -45,3 +45,4 @@ class WildFlower(Generic):
 class Tree(Generic):
     def __init__(self, pos, surface, groups, name):
         """Initializes a tree sprite."""
+        super().__init__(pos, surface, groups)

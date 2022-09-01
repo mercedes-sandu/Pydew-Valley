@@ -41,6 +41,8 @@ class Level:
             Water((x * TILE_SIZE, y * TILE_SIZE), water_frames, self.all_sprites)
 
         # Trees
+        for obj in tmx_data.get_layer_by_name('Trees'):
+            Tree((obj.x, obj.y), obj.image, self.all_sprites, obj.name)
 
         # WildFlowers
         for obj in tmx_data.get_layer_by_name('Decoration'):
@@ -77,7 +79,7 @@ class CameraGroup(pygame.sprite.Group):
         self.offset.y = player.rect.centery - SCREEN_HEIGHT / 2
 
         for layer in LAYERS.values():
-            for sprite in self.sprites():
+            for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
                 if sprite.z == layer:
                     offset_rect = sprite.rect.copy()
                     offset_rect.center -= self.offset
