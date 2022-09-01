@@ -2,7 +2,7 @@ from pygame.math import Vector2
 
 # Screen
 SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 740
+SCREEN_HEIGHT = 740 # 720
 # TITLE_SIZE = 64
 
 # # Overlay positions
