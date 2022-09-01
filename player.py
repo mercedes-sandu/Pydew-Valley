@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
         """Initializes the player."""
         super().__init__(group)
 
+        # Animation/sprite setup
         self.import_assets()
         self.status = 'down_idle'
         self.frame_index = 0
@@ -48,23 +49,45 @@ class Player(pygame.sprite.Sprite):
             full_path = './graphics/character/' + animation
             self.animations[animation] = import_folder(full_path)
 
+    def animate(self, dt):
+        """Animates the player sprite."""
+        self.frame_index += 4 * dt
+
+        if self.frame_index >= len(self.animations[self.status]):
+            self.frame_index = 0
+
+        self.image = self.animations[self.status][int(self.frame_index)]
+
     def input(self):
         """Processes input for the player."""
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_UP]:
             self.direction.y = -1
+            self.status = 'up'
         elif keys[pygame.K_DOWN]:
             self.direction.y = 1
+            self.status = 'down'
         else: 
             self.direction.y = 0
         
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1
+            self.status = 'right'
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1
+            self.status = 'left'
         else:
             self.direction.x = 0
+
+    def get_status(self):
+        """Sets status of the player appropriately."""
+
+        # Idle
+        if self.direction.magnitude() == 0:
+            self.status = self.status.split('_')[0] + '_idle'
+
+        # Tool use
 
     def move(self, dt):
         """Moves the player's pos."""
@@ -84,4 +107,6 @@ class Player(pygame.sprite.Sprite):
     def update(self, dt):
         """Updates the player."""
         self.input()
+        self.get_status()
         self.move(dt)
+        self.animate(dt)
