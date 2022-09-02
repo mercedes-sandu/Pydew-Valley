@@ -8,6 +8,7 @@ class Generic(pygame.sprite.Sprite):
         self.image = surface
         self.rect = self.image.get_rect(topleft = pos)
         self.z = z
+        self.hitbox = self.rect.copy().inflate(-self.rect.width * 0.2, -self.rect.height * 0.75)
 
 class Water(Generic):
     def __init__(self, pos, frames, groups):
@@ -41,6 +42,7 @@ class WildFlower(Generic):
     def __init__(self, pos, surface, groups):
         """Initializes a wildflower sprite."""
         super().__init__(pos, surface, groups)
+        self.hitbox = self.rect.copy().inflate(-20, -self.rect.height * 0.9)
 
 class Tree(Generic):
     def __init__(self, pos, surface, groups, name):
