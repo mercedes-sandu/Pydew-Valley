@@ -13,14 +13,12 @@ class Generic(pygame.sprite.Sprite):
         self.hitbox = self.rect.copy().inflate(-self.rect.width *
                                                0.2, -self.rect.height * 0.75)
 
-
 class Interaction(Generic):
     def __init__(self, pos, size, groups, name):
         """Initializes an interactable sprite."""
         surface = pygame.Surface(size)
         super().__init__(pos, surface, groups)
         self.name = name
-
 
 class Water(Generic):
     def __init__(self, pos, frames, groups):
@@ -50,13 +48,11 @@ class Water(Generic):
         """Updates the water sprites."""
         self.animate(dt)
 
-
 class WildFlower(Generic):
     def __init__(self, pos, surface, groups):
         """Initializes a wildflower sprite."""
         super().__init__(pos, surface, groups)
         self.hitbox = self.rect.copy().inflate(-20, -self.rect.height * 0.9)
-
 
 class Particle(Generic):
     def __init__(self, pos, surface, groups, z, duration=200):
@@ -76,7 +72,6 @@ class Particle(Generic):
         current_time = pygame.time.get_ticks()
         if current_time - self.start_time > self.duration:
             self.kill()
-
 
 class Tree(Generic):
     def __init__(self, pos, surface, groups, name, player_add):

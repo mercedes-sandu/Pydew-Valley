@@ -103,6 +103,9 @@ class Level:
                 apple.kill()
             tree.create_fruit()
 
+        # Soil
+        self.soil_layer.remove_water()
+
     def run(self, dt):
         """Runs/updates the level."""
         self.display_surface.fill('black')
@@ -113,7 +116,6 @@ class Level:
 
         if self.player.sleep:
             self.transition.play()
-
 
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
