@@ -1,4 +1,3 @@
-from re import L
 import pygame
 from settings import *
 from pytmx.util_pygame import load_pygame
