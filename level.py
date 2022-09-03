@@ -6,6 +6,7 @@ from sprites import Generic, Water, WildFlower, Tree, Interaction
 from pytmx.util_pygame import load_pygame
 from support import *
 from transition import Transition
+from soil import SoilLayer
 
 class Level:
     def __init__(self):
@@ -19,6 +20,7 @@ class Level:
         self.tree_sprites = pygame.sprite.Group()
         self.interaction_sprites = pygame.sprite.Group()
 
+        self.soil_layer = SoilLayer(self.all_sprites)
         self.setup()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.reset, self.player)
@@ -30,53 +32,63 @@ class Level:
         # House
         for layer in ['HouseFloor', 'HouseFurnitureBottom']:
             for x, y, surface in tmx_data.get_layer_by_name(layer).tiles():
-                Generic((x * TILE_SIZE, y * TILE_SIZE), surface, self.all_sprites, LAYERS['house bottom'])
+                Generic((x * TILE_SIZE, y * TILE_SIZE), surface,
+                        self.all_sprites, LAYERS['house bottom'])
 
         for layer in ['HouseWalls', 'HouseFurnitureTop']:
             for x, y, surface in tmx_data.get_layer_by_name(layer).tiles():
-                Generic((x * TILE_SIZE, y * TILE_SIZE), surface, self.all_sprites)
+                Generic((x * TILE_SIZE, y * TILE_SIZE),
+                        surface, self.all_sprites)
 
         # Fence
         for x, y, surface in tmx_data.get_layer_by_name('Fence').tiles():
-            Generic((x * TILE_SIZE, y * TILE_SIZE), surface, [self.all_sprites, self.collision_sprites])
-        
+            Generic((x * TILE_SIZE, y * TILE_SIZE), surface,
+                    [self.all_sprites, self.collision_sprites])
+
         # Water
         water_frames = import_folder('./graphics/water')
         for x, y, surface in tmx_data.get_layer_by_name('Water').tiles():
-            Water((x * TILE_SIZE, y * TILE_SIZE), water_frames, self.all_sprites)
+            Water((x * TILE_SIZE, y * TILE_SIZE),
+                  water_frames, self.all_sprites)
 
         # Trees
         for obj in tmx_data.get_layer_by_name('Trees'):
-            Tree((obj.x, obj.y), obj.image, [self.all_sprites, self.collision_sprites, self.tree_sprites], obj.name, self.player_add)
+            Tree((obj.x, obj.y), obj.image, [
+                 self.all_sprites, self.collision_sprites, self.tree_sprites], obj.name, self.player_add)
 
         # Wildflowers
         for obj in tmx_data.get_layer_by_name('Decoration'):
-            WildFlower((obj.x, obj.y), obj.image, [self.all_sprites, self.collision_sprites])
+            WildFlower((obj.x, obj.y), obj.image, [
+                       self.all_sprites, self.collision_sprites])
 
         # Collision tiles
         for x, y, surface in tmx_data.get_layer_by_name('Collision').tiles():
-            Generic((x * TILE_SIZE, y * TILE_SIZE), pygame.Surface((TILE_SIZE, TILE_SIZE)), self.collision_sprites)
+            Generic((x * TILE_SIZE, y * TILE_SIZE),
+                    pygame.Surface((TILE_SIZE, TILE_SIZE)), self.collision_sprites)
 
         # Player
         for obj in tmx_data.get_layer_by_name('Player'):
             if obj.name == 'Start':
                 self.player = Player(
-                    pos = (obj.x, obj.y), 
-                    group = self.all_sprites, 
-                    collision_sprites = self.collision_sprites,
-                    tree_sprites = self.tree_sprites,
-                    interaction_sprites = self.interaction_sprites
+                    pos=(obj.x, obj.y),
+                    group=self.all_sprites,
+                    collision_sprites=self.collision_sprites,
+                    tree_sprites=self.tree_sprites,
+                    interaction_sprites=self.interaction_sprites,
+                    soil_layer=self.soil_layer
                 )
 
             if obj.name == 'Bed':
-                Interaction((obj.x, obj.y), (obj.width, obj.height), self.interaction_sprites, obj.name)
+                Interaction((obj.x, obj.y), (obj.width, obj.height),
+                            self.interaction_sprites, obj.name)
 
         # Ground
         Generic(
-            pos = (0, 0), 
-            surface = pygame.image.load('./graphics/world/ground.png').convert_alpha(), 
-            groups = self.all_sprites,
-            z = LAYERS['ground']
+            pos=(0, 0),
+            surface=pygame.image.load(
+                './graphics/world/ground.png').convert_alpha(),
+            groups=self.all_sprites,
+            z=LAYERS['ground']
         )
 
     def player_add(self, item):
@@ -102,6 +114,7 @@ class Level:
         if self.player.sleep:
             self.transition.play()
 
+
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
         """Initializes a camera."""
@@ -115,7 +128,7 @@ class CameraGroup(pygame.sprite.Group):
         self.offset.y = player.rect.centery - SCREEN_HEIGHT / 2
 
         for layer in LAYERS.values():
-            for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
+            for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
                 if sprite.z == layer:
                     offset_rect = sprite.rect.copy()
                     offset_rect.center -= self.offset

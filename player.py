@@ -4,7 +4,7 @@ from support import *
 from timer import Timer
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, group, collision_sprites, tree_sprites, interaction_sprites):
+    def __init__(self, pos, group, collision_sprites, tree_sprites, interaction_sprites, soil_layer):
         """Initializes the player."""
         super().__init__(group)
 
@@ -15,7 +15,7 @@ class Player(pygame.sprite.Sprite):
 
         # General setup
         self.image = self.animations[self.status][self.frame_index]
-        self.rect = self.image.get_rect(center = pos)
+        self.rect = self.image.get_rect(center=pos)
         self.z = LAYERS['main']
 
         # Movement attributes
@@ -57,11 +57,12 @@ class Player(pygame.sprite.Sprite):
         self.tree_sprites = tree_sprites
         self.interaction_sprites = interaction_sprites
         self.sleep = False
+        self.soil_layer = soil_layer
 
     def use_tool(self):
         """Allows the player to use its selected tool."""
         if self.selected_tool == 'hoe':
-            pass
+            self.soil_layer.get_hit(self.target_pos)
 
         if self.selected_tool == 'axe':
             for tree in self.tree_sprites.sprites():
@@ -73,7 +74,8 @@ class Player(pygame.sprite.Sprite):
 
     def get_target_pos(self):
         """Gets the position of the player's tool's target."""
-        self.target_pos = self.rect.center + PLAYER_TOOL_OFFSET[self.status.split('_')[0]]
+        self.target_pos = self.rect.center + \
+            PLAYER_TOOL_OFFSET[self.status.split('_')[0]]
 
     def use_seed(self):
         """Allows the player to use its selected seed."""
@@ -128,9 +130,9 @@ class Player(pygame.sprite.Sprite):
             elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
                 self.direction.y = 1
                 self.status = 'down'
-            else: 
+            else:
                 self.direction.y = 0
-            
+
             if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 self.direction.x = 1
                 self.status = 'right'
@@ -150,7 +152,8 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_q] and not self.timers['tool switch'].active:
                 self.timers['tool switch'].activate()
                 self.tool_index += 1
-                self.tool_index = self.tool_index if self.tool_index < len(self.tools) else 0
+                self.tool_index = self.tool_index if self.tool_index < len(
+                    self.tools) else 0
                 self.selected_tool = self.tools[self.tool_index]
 
             # Seed use
@@ -163,12 +166,14 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_e] and not self.timers['seed switch'].active:
                 self.timers['seed switch'].activate()
                 self.seed_index += 1
-                self.seed_index = self.seed_index if self.seed_index < len(self.seeds) else 0
+                self.seed_index = self.seed_index if self.seed_index < len(
+                    self.seeds) else 0
                 self.selected_seed = self.seeds[self.seed_index]
 
             # Bed interaction
             if keys[pygame.K_RETURN]:
-                collided_interaction_sprite = pygame.sprite.spritecollide(self, self.interaction_sprites, False)
+                collided_interaction_sprite = pygame.sprite.spritecollide(
+                    self, self.interaction_sprites, False)
                 if collided_interaction_sprite:
                     if collided_interaction_sprite[0].name == 'Trader':
                         pass
@@ -184,7 +189,7 @@ class Player(pygame.sprite.Sprite):
 
         # Tool use
         if self.timers['tool use'].active:
-            self.status = self.status.split('_')[0] + '_' +  self.selected_tool
+            self.status = self.status.split('_')[0] + '_' + self.selected_tool
 
     def update_timers(self):
         """Updates the player's timers."""
@@ -197,17 +202,17 @@ class Player(pygame.sprite.Sprite):
             if hasattr(sprite, 'hitbox'):
                 if sprite.hitbox.colliderect(self.hitbox):
                     if direction == 'horizontal':
-                        if self.direction.x > 0: # moving right
+                        if self.direction.x > 0:  # moving right
                             self.hitbox.right = sprite.hitbox.left
-                        if self.direction.x < 0: # moving left
+                        if self.direction.x < 0:  # moving left
                             self.hitbox.left = sprite.hitbox.right
                         self.rect.centerx = self.hitbox.centerx
                         self.pos.x = self.hitbox.centerx
 
                     if direction == 'vertical':
-                        if self.direction.y > 0: # moving down
+                        if self.direction.y > 0:  # moving down
                             self.hitbox.bottom = sprite.hitbox.top
-                        if self.direction.y < 0: # moving up
+                        if self.direction.y < 0:  # moving up
                             self.hitbox.top = sprite.hitbox.bottom
                         self.rect.centery = self.hitbox.centery
                         self.pos.y = self.hitbox.centery
@@ -223,7 +228,7 @@ class Player(pygame.sprite.Sprite):
         self.hitbox.centerx = round(self.pos.x)
         self.rect.centerx = self.hitbox.centerx
         self.collision('horizontal')
-        
+
         # Vertical movement
         self.pos.y += self.direction.y * self.speed * dt
         self.hitbox.centery = round(self.pos.y)
