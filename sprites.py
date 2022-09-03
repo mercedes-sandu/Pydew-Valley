@@ -1,4 +1,3 @@
-from asyncio import current_task
 import pygame
 from settings import *
 from timer import Timer
