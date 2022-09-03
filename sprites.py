@@ -67,7 +67,7 @@ class Particle(Generic):
             self.kill()
 
 class Tree(Generic):
-    def __init__(self, pos, surface, groups, name):
+    def __init__(self, pos, surface, groups, name, player_add):
         """Initializes a tree sprite and its apples."""
         super().__init__(pos, surface, groups)
 
@@ -83,6 +83,8 @@ class Tree(Generic):
         self.apple_pos = APPLE_POS[name]
         self.apple_sprites = pygame.sprite.Group()
         self.create_fruit()
+
+        self.player_add = player_add
 
     def create_fruit(self):
         """Creates a fruit object."""
@@ -106,6 +108,7 @@ class Tree(Generic):
         if len(self.apple_sprites.sprites()) > 0:
             random_apple = choice(self.apple_sprites.sprites())
             Particle(random_apple.rect.topleft, random_apple.image, self.groups()[0], LAYERS['fruit'])
+            self.player_add('apple')
             random_apple.kill()
 
     def check_death(self):
@@ -116,6 +119,7 @@ class Tree(Generic):
             self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
             self.hitbox = self.rect.copy().inflate(-10, -self.rect.height * 0.6)
             self.alive = False
+            self.player_add('wood')
 
     def update(self, dt):
         """Updates the tree object."""
