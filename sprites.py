@@ -1,3 +1,4 @@
+from asyncio import current_task
 import pygame
 from settings import *
 from timer import Timer
@@ -46,6 +47,25 @@ class WildFlower(Generic):
         super().__init__(pos, surface, groups)
         self.hitbox = self.rect.copy().inflate(-20, -self.rect.height * 0.9)
 
+class Particle(Generic):
+    def __init__(self, pos, surface, groups, z, duration = 200):
+        """Initializes a particle sprite."""
+        super().__init__(pos, surface, groups, z)
+        self.start_time = pygame.time.get_ticks()
+        self.duration = duration
+
+        # White surface
+        mask_surface = pygame.mask.from_surface(self.image)
+        new_surface = mask_surface.to_surface()
+        new_surface.set_colorkey((0, 0, 0))
+        self.image = new_surface
+
+    def update(self, dt):
+        """Updates the particle sprites."""
+        current_time = pygame.time.get_ticks()
+        if current_time - self.start_time > self.duration:
+            self.kill()
+
 class Tree(Generic):
     def __init__(self, pos, surface, groups, name):
         """Initializes a tree sprite and its apples."""
@@ -85,11 +105,13 @@ class Tree(Generic):
         # Remove an apple
         if len(self.apple_sprites.sprites()) > 0:
             random_apple = choice(self.apple_sprites.sprites())
+            Particle(random_apple.rect.topleft, random_apple.image, self.groups()[0], LAYERS['fruit'])
             random_apple.kill()
 
     def check_death(self):
         """Checks whether the tree is alive and changes its state if dead."""
         if self.health <= 0:
+            Particle(self.rect.topleft, self.image, self.groups()[0], LAYERS['fruit'], 300)
             self.image = self.stump_surface
             self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
             self.hitbox = self.rect.copy().inflate(-10, -self.rect.height * 0.6)
