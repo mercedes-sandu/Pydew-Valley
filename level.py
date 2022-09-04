@@ -5,10 +5,11 @@ from overlay import Overlay
 from sprites import Generic, Water, WildFlower, Tree, Interaction, Particle
 from pytmx.util_pygame import load_pygame
 from support import *
-from transition import Transition #, Start_Transition
+from transition import Transition
 from soil import SoilLayer
 from sky import Rain, Sky
 from random import randint
+from merchant import Merchant
 
 class Level:
     def __init__(self):
@@ -26,16 +27,16 @@ class Level:
         self.setup()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.reset, self.player)
-        
-        # # New: Task #001
-        # self.starting = True
-        # self.start_transition = Start_Transition(self)
 
         # Sky
         self.rain = Rain(self.all_sprites)
         self.raining = randint(0, 10) > 7
         self.soil_layer.raining = self.raining
         self.sky = Sky()
+
+        # Shop
+        self.merchant = Merchant(self.player, self.toggle_shop)
+        self.shop_active = False
 
     def setup(self):
         """Sets up the level."""
@@ -86,10 +87,15 @@ class Level:
                     collision_sprites = self.collision_sprites,
                     tree_sprites = self.tree_sprites,
                     interaction_sprites = self.interaction_sprites,
-                    soil_layer = self.soil_layer
+                    soil_layer = self.soil_layer,
+                    toggle_shop = self.toggle_shop
                 )
 
             if obj.name == 'Bed':
+                Interaction((obj.x, obj.y), (obj.width, obj.height),
+                            self.interaction_sprites, obj.name)
+
+            if obj.name == 'Trader':
                 Interaction((obj.x, obj.y), (obj.width, obj.height),
                             self.interaction_sprites, obj.name)
 
@@ -104,6 +110,10 @@ class Level:
     def player_add(self, item):
         """Adds the specified item to the player's inventory."""
         self.player.item_inventory[item] += 1
+
+    def toggle_shop(self):
+        """Toggles the merchant's shop menu."""
+        self.shop_active = not self.shop_active
 
     def reset(self):
         """Resets the day."""
@@ -138,21 +148,21 @@ class Level:
 
     def run(self, dt):
         """Runs/updates the level."""
+        # Drawing logic
         self.display_surface.fill('black')
-        # # New: Task #001
-        # if self.starting:
-        #     self.start_transition.play()
         self.all_sprites.custom_draw(self.player)
-        self.all_sprites.update(dt)
-        self.plant_collision()
 
+        # Updates
+        if self.shop_active:
+            self.merchant.update()
+        else:
+            self.all_sprites.update(dt)
+            self.plant_collision()
+
+        # Weather
         self.overlay.display()
-
-        # Rain
-        if self.raining:
+        if self.raining and not self.shop_active:
             self.rain.update()
-
-        # Daytime
         self.sky.display(dt)
 
         # Transition overlay
