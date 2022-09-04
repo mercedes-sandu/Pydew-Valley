@@ -79,6 +79,7 @@ class Player(pygame.sprite.Sprite):
 
     def use_seed(self):
         """Allows the player to use its selected seed."""
+        self.soil_layer.plant_seed(self.target_pos, self.selected_seed)
 
     def import_assets(self):
         """Imports all of the assets for the player."""

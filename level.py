@@ -5,7 +5,7 @@ from overlay import Overlay
 from sprites import Generic, Water, WildFlower, Tree, Interaction
 from pytmx.util_pygame import load_pygame
 from support import *
-from transition import Transition
+from transition import Transition #, Start_Transition
 from soil import SoilLayer
 from sky import Rain
 from random import randint
@@ -22,10 +22,14 @@ class Level:
         self.tree_sprites = pygame.sprite.Group()
         self.interaction_sprites = pygame.sprite.Group()
 
-        self.soil_layer = SoilLayer(self.all_sprites)
+        self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
         self.setup()
         self.overlay = Overlay(self.player)
         self.transition = Transition(self.reset, self.player)
+        
+        # # New: Task #001
+        # self.starting = True
+        # self.start_transition = Start_Transition(self)
 
         # Sky
         self.rain = Rain(self.all_sprites)
@@ -65,8 +69,7 @@ class Level:
 
         # Wildflowers
         for obj in tmx_data.get_layer_by_name('Decoration'):
-            WildFlower((obj.x, obj.y), obj.image, [
-                       self.all_sprites, self.collision_sprites])
+            WildFlower((obj.x, obj.y), obj.image, [self.all_sprites, self.collision_sprites])
 
         # Collision tiles
         for x, y, surface in tmx_data.get_layer_by_name('Collision').tiles():
@@ -77,12 +80,12 @@ class Level:
         for obj in tmx_data.get_layer_by_name('Player'):
             if obj.name == 'Start':
                 self.player = Player(
-                    pos=(obj.x, obj.y),
-                    group=self.all_sprites,
-                    collision_sprites=self.collision_sprites,
-                    tree_sprites=self.tree_sprites,
-                    interaction_sprites=self.interaction_sprites,
-                    soil_layer=self.soil_layer
+                    pos = (obj.x, obj.y),
+                    group = self.all_sprites,
+                    collision_sprites = self.collision_sprites,
+                    tree_sprites = self.tree_sprites,
+                    interaction_sprites = self.interaction_sprites,
+                    soil_layer = self.soil_layer
                 )
 
             if obj.name == 'Bed':
@@ -91,11 +94,10 @@ class Level:
 
         # Ground
         Generic(
-            pos=(0, 0),
-            surface=pygame.image.load(
-                './graphics/world/ground.png').convert_alpha(),
-            groups=self.all_sprites,
-            z=LAYERS['ground']
+            pos = (0, 0),
+            surface = pygame.image.load('./graphics/world/ground.png').convert_alpha(),
+            groups = self.all_sprites,
+            z = LAYERS['ground']
         )
 
     def player_add(self, item):
@@ -104,6 +106,9 @@ class Level:
 
     def reset(self):
         """Resets the day."""
+        # Plants
+        self.soil_layer.update_plants()
+
         # Apples on the trees
         for tree in self.tree_sprites.sprites():
             for apple in tree.apple_sprites.sprites():
@@ -120,6 +125,9 @@ class Level:
     def run(self, dt):
         """Runs/updates the level."""
         self.display_surface.fill('black')
+        # # New: Task #001
+        # if self.starting:
+        #     self.start_transition.play()
         self.all_sprites.custom_draw(self.player)
         self.all_sprites.update(dt)
 
@@ -146,7 +154,7 @@ class CameraGroup(pygame.sprite.Group):
         self.offset.y = player.rect.centery - SCREEN_HEIGHT / 2
 
         for layer in LAYERS.values():
-            for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
+            for sprite in sorted(self.sprites(), key = lambda sprite: sprite.rect.centery):
                 if sprite.z == layer:
                     offset_rect = sprite.rect.copy()
                     offset_rect.center -= self.offset

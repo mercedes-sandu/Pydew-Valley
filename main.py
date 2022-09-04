@@ -7,7 +7,8 @@ class Game:
         """Initializes the game window."""
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('Pydew Valley')
+        pygame.display.set_caption(' Pydew Valley')
+        pygame.display.set_icon(pygame.image.load('./graphics/fruit/apple.png'))
         self.clock = pygame.time.Clock()
         self.level = Level()
 
