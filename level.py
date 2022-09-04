@@ -38,6 +38,13 @@ class Level:
         self.merchant = Merchant(self.player, self.toggle_shop)
         self.shop_active = False
 
+        # Music
+        self.success = pygame.mixer.Sound('./audio/success.wav')
+        self.success.set_volume(0.1)
+        self.music = pygame.mixer.Sound('./audio/music.mp3')
+        self.music.set_volume(0.2)
+        self.music.play(loops = -1)
+
     def setup(self):
         """Sets up the level."""
         tmx_data = load_pygame('./data/map.tmx')
@@ -110,6 +117,7 @@ class Level:
     def player_add(self, item):
         """Adds the specified item to the player's inventory."""
         self.player.item_inventory[item] += 1
+        self.success.play()
 
     def toggle_shop(self):
         """Toggles the merchant's shop menu."""

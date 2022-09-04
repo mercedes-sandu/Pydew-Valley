@@ -83,7 +83,6 @@ class Tree(Generic):
         self.alive = True
         stump_path = f'./graphics/stumps/{"small" if name == "Small" else "large"}.png'
         self.stump_surface = pygame.image.load(stump_path).convert_alpha()
-        self.invul_timer = Timer(200)
 
         # Apples
         self.apple_surface = pygame.image.load('./graphics/fruit/apple.png')
@@ -92,6 +91,10 @@ class Tree(Generic):
         self.create_fruit()
 
         self.player_add = player_add
+
+        # Sounds
+        self.axe_sound = pygame.mixer.Sound('./audio/axe.mp3')
+        self.axe_sound.set_volume(0.1)
 
     def create_fruit(self):
         """Creates a fruit object."""
@@ -110,6 +113,9 @@ class Tree(Generic):
         """Takes health away from the tree."""
         # Damage the tree
         self.health -= 1
+
+        # Play sound
+        self.axe_sound.play()
 
         # Remove an apple
         if len(self.apple_sprites.sprites()) > 0:
